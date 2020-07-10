@@ -11,7 +11,7 @@ else
 # Deleting Previous Windows Installation by the Script
 #umount -l /mnt /media/script /media/sw
 #rm -rf /mediabots /floppy /virtio /media/* /tmp/*
-#rm -f /sw.iso /disk.img 
+#rm -f /sw.iso /disk.img
 # installing required Ubuntu packages
 dist=$(hostnamectl | egrep "Operating System" | cut -f2 -d":" | cut -f2 -d " ")
 if [ $dist = "CentOS" ] ; then
@@ -34,10 +34,10 @@ sudo ln -s /usr/bin/genisoimage /usr/bin/mkisofs
 sudo mkdir /mediabots /floppy /virtio
 link1_status=$(curl -Is http://download.microsoft.com/download/6/2/A/62A76ABB-9990-4EFC-A4FE-C7D698DAEB96/9600.17050.WINBLUE_REFRESH.140317-1640_X64FRE_SERVER_EVAL_EN-US-IR3_SSS_X64FREE_EN-US_DV9.ISO | grep HTTP | cut -f2 -d" " | head -1)
 link2_status=$(curl -Is https://ia601506.us.archive.org/4/items/WS2012R2/WS2012R2.ISO | grep HTTP | cut -f2 -d" ")
-#sudo wget -P /mediabots https://archive.org/download/WS2012R2/WS2012R2.ISO # Windows Server 2012 R2 
-if [ $link1_status = "200" ] ; then 
-	sudo wget -O /mediabots/WS2012R2.ISO http://download.microsoft.com/download/6/2/A/62A76ABB-9990-4EFC-A4FE-C7D698DAEB96/9600.17050.WINBLUE_REFRESH.140317-1640_X64FRE_SERVER_EVAL_EN-US-IR3_SSS_X64FREE_EN-US_DV9.ISO 
-elif [ $link2_status = "200" -o $link2_status = "301" -o $link2_status = "302" ] ; then 
+#sudo wget -P /mediabots https://archive.org/download/WS2012R2/WS2012R2.ISO # Windows Server 2012 R2
+if [ $link1_status = "200" ] ; then
+	sudo wget -O /mediabots/WS2012R2.ISO http://download.microsoft.com/download/6/2/A/62A76ABB-9990-4EFC-A4FE-C7D698DAEB96/9600.17050.WINBLUE_REFRESH.140317-1640_X64FRE_SERVER_EVAL_EN-US-IR3_SSS_X64FREE_EN-US_DV9.ISO
+elif [ $link2_status = "200" -o $link2_status = "301" -o $link2_status = "302" ] ; then
 	sudo wget -P /mediabots https://ia601506.us.archive.org/4/items/WS2012R2/WS2012R2.ISO
 else
 	echo -e "${RED}[Error]${NC} ${YELLOW}Sorry! None of Windows OS image urls are available , please report about this issue on Github page : ${NC}https://github.com/mediabots/Linux-to-Windows-with-QEMU"
@@ -47,7 +47,7 @@ else
 fi
 sudo wget -P /floppy https://ftp.mozilla.org/pub/firefox/releases/64.0/win32/en-US/Firefox%20Setup%2064.0.exe
 sudo mv /floppy/'Firefox Setup 64.0.exe' /floppy/Firefox.exe
-sudo wget -P /floppy https://downloadmirror.intel.com/23073/eng/PROWinx64.exe # Intel Network Adapter for Windows Server 2012 R2 
+sudo wget -P /floppy https://downloadmirror.intel.com/23073/eng/PROWinx64.exe # Intel Network Adapter for Windows Server 2012 R2
 # Powershell script to auto enable remote desktop for administrator
 sudo touch /floppy/EnableRDP.ps1
 sudo echo -e "Set-ItemProperty 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\' -Name \"fDenyTSConnections\" -Value 0" >> /floppy/EnableRDP.ps1
@@ -68,7 +68,7 @@ fs=($(df | awk '{print $1}'))
 for j in $(df | awk '{print $6}');do if [ $j = "/" ] ; then os=${fs[$idx]};echo $os;fi;idx=$((idx+1));done
 #
 ip=$(curl ifconfig.me)
-echo "Linux Distro : "$dist 
+echo "Linux Distro : "$dist
 virtualization=$(lscpu | grep Virtualization: | head -1 | cut -f2 -d":" | awk '{$1=$1;print}')
 echo "Virtualization : "$virtualization
 model=$(lscpu | grep "Model name:" | head -1 | cut -f2 -d":" | awk '{$1=$1;print}')
@@ -79,7 +79,7 @@ if [ $dist = "Debian" ] ;then availableRAMcommand="free -m | head -2 | tail -1 |
 availableRAM=$(echo $availableRAMcommand | bash)
 echo "Available RAM : "$availableRAM" MB"
 diskNumbers=$(fdisk -l | grep "Disk /dev/" | wc -l)
-partNumbers=$(lsblk | egrep "part" | wc -l) # $(fdisk -l | grep "^/dev/" | wc -l) 
+partNumbers=$(lsblk | egrep "part" | wc -l) # $(fdisk -l | grep "^/dev/" | wc -l)
 firstDisk=$(fdisk -l | grep "Disk /dev/" | head -1 | cut -f1 -d":" | cut -f2 -d" ")
 freeDisk=$(df | grep "^/dev/" | awk '{print$1 " " $4}' | sort -g -k 2 | tail -1 | cut -f2 -d" ")
 # Windows required at least 25 GB free disk space
@@ -133,7 +133,7 @@ if [ $availableRAM -ge 4650 ] ; then # opened 2nd if
 		mounted=1
 	else
 		if [ $firstDiskLow = 0 ] ; then
-			if [ $partNumbers -gt 1 ] ; then 
+			if [ $partNumbers -gt 1 ] ; then
 				idx=0;ix=0;
 				#for i in $(fdisk -l | grep "^/dev/" | tr -d "*" | tr -s '[:space:]' | cut -f5 -d" "); do
 				for i in $(lsblk | egrep "part"  |  tr -s '[:space:]' | cut -f4 -d" "); do
@@ -141,7 +141,7 @@ if [ $availableRAM -ge 4650 ] ; then # opened 2nd if
 				if [[ $i == *"G"  ]]; then a=$(echo $i | tr -d "G"); a=${a%.*} ; if [ $a -ge 25 -a $ix = 0 -a ${b[idx]} != $os ] ; then firstDisk=${b[idx]} ; custom_param_disk=$firstDisk ; partition=1 ; ix=$((ix+3)) ; elif [ $a -ge 25 -a $ix = 3 -a ${b[idx]} != $os ] ; then other_drives="-drive file=${b[idx]},index=$ix,media=disk,format=raw " ; fi ; fi ;
 				idx=$((idx+1));
 				done
-				if [ $partition = 0 ] ;then 
+				if [ $partition = 0 ] ;then
 					echo "creating disk image"
 					sudo dd if=/dev/zero of=/disk.img bs=1024k seek=$newDisk count=0
 					custom_param_disk="/disk.img"
@@ -157,14 +157,14 @@ if [ $availableRAM -ge 4650 ] ; then # opened 2nd if
 	fi
 else
 	if [ $firstDiskLow = 0 ] ; then
-		if [ $partNumbers -gt 1 ] ; then 
+		if [ $partNumbers -gt 1 ] ; then
 			idx=0;ix=0;
 			for i in $(lsblk | egrep "part"  |  tr -s '[:space:]' | cut -f4 -d" "); do
 			b=($(lsblk | egrep "part"  |  tr -s '[:space:]' | cut -f1 -d" " | tr -cd "[:alnum:]\n" | sed 's/^/\/dev\//'))
 			if [[ $i == *"G"  ]]; then a=$(echo $i | tr -d "G"); a=${a%.*} ; if [ $a -ge 25 -a $ix = 0 -a ${b[idx]} != $os ] ; then firstDisk=${b[idx]} ; custom_param_disk=$firstDisk ; partition=1 ; ix=$((ix+3)) ; elif [ $a -ge 25 -a $ix = 3 -a ${b[idx]} != $os ] ; then other_drives="-drive file=${b[idx]},index=$ix,media=disk,format=raw " ; fi ; fi ;
 			idx=$((idx+1));
 			done
-			if [ $partition = 0 ] ;then 
+			if [ $partition = 0 ] ;then
 				echo "creating disk image"
 				sudo dd if=/dev/zero of=/disk.img bs=1024k seek=$newDisk count=0
 				custom_param_disk="/disk.img"
@@ -214,7 +214,7 @@ if [ $partition = 0 ] ; then
 ix=2
 if [ $custom_param_disk != "/disk.img" ] ; then
 	for i in $(fdisk -l | grep "Disk /dev/" | cut -f2 -d" " | cut -f1 -d ":") ; do
-	if [ $i != $custom_param_disk ];then 
+	if [ $i != $custom_param_disk ];then
 	#echo $i;
 	ix=$((ix+1))
 	other_drives=$other_drives"-drive file=$i,index=$ix,media=disk,format=raw "
@@ -228,14 +228,14 @@ fi
 echo "[ Running the KVM ]"
 if [ $skipped = 0 ] ; then
 echo "[.] running QEMU-KVM"
-sudo $qemupath -net nic -net user,hostfwd=tcp::3389-:3389 -show-cursor $custom_param_ram -localtime -enable-kvm -cpu host,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time,+nx -M pc -smp cores=$cpus -vga std -machine type=pc,accel=kvm -usb -device usb-tablet -k en-us -drive file=$custom_param_disk,index=0,media=disk$format -drive file=$custom_param_os,index=1,media=cdrom -drive file=$custom_param_sw,index=2,media=cdrom $other_drives -boot once=d -vnc :9 &	
+sudo $qemupath -net nic -net user,hostfwd=tcp::3389-:3389 -show-cursor $custom_param_ram -localtime -enable-kvm -cpu host,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time,+nx -M pc -smp cores=$cpus -vga std -machine type=pc,accel=kvm -usb -device usb-tablet -k en-us -drive file=$custom_param_disk,index=0,media=disk$format -drive file=$custom_param_os,index=1,media=cdrom -drive file=$custom_param_sw,index=2,media=cdrom $other_drives -boot once=d -vnc :9 &
 # [note- no sudo should be used after that]
 #pidqemu=$(pgrep qemu) # does not work
 pid=$(echo $! | head -1)
 disown -h $pid
 echo "disowned PID : "$pid
 echo "[ For Debugging purpose ]"
-echo -e "$qemupath -net nic -net user,hostfwd=tcp::3389-:3389 -show-cursor $custom_param_ram -localtime -enable-kvm -cpu host,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time,+nx -M pc -smp cores=$cpus -vga std -machine type=pc,accel=kvm -usb -device usb-tablet -k en-us -drive file=$custom_param_disk,index=0,media=disk$format -drive file=$custom_param_os,index=1,media=cdrom -drive file=$custom_param_sw,index=2,media=cdrom $other_drives -boot once=d -vnc :9 & disown %1"
+echo -e "$qemupath -net nic -net user,hostfwd=tcp::3389-:3389 -show-cursor $custom_param_ram -rtc base=localtime -enable-kvm -cpu host,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time,+nx -M pc -smp cores=$cpus -vga std -machine type=pc,accel=kvm -usb -device usb-tablet -k en-us -drive file=$custom_param_disk,index=0,media=disk$format -drive file=$custom_param_os,index=1,media=cdrom -drive file=$custom_param_sw,index=2,media=cdrom $other_drives -boot once=d -vnc :9 & disown %1"
 if [ $mounted = 1 ]; then
 echo -e "wget -P /tmp https://archive.org/download/vkvm.tar_201903/vkvm.tar.gz && tar -C /tmp -zxvf /tmp/vkvm.tar.gz && rm /tmp/vkvm.tar.gz && $qemupath -net nic -net user,hostfwd=tcp::3389-:3389 -show-cursor $custom_param_ram -localtime -enable-kvm -cpu host,hv_relaxed,hv_spinlocks=0x1fff,hv_vapic,hv_time,+nx -M pc -smp cores=$cpus -vga std -machine type=pc,accel=kvm -usb -device usb-tablet -k en-us -drive file=$custom_param_disk,index=0,media=disk$format $other_drives -boot c -vnc :9 & disown %1" > /details.txt
 else
@@ -256,7 +256,7 @@ setup_initial=$(echo "$setup_initial" | head -c 1)
 sleep 10
 if [ ! -z $setup_initial ] && [ $setup_initial = 'Y' -o $setup_initial = 'y' ] ; then
 echo $pid $cpus $custom_param_disk $custom_param_sw $other_drives
-echo "helper called" 
+echo "helper called"
 for i in $(ps aux | grep -i "qemu" | head -2 | tr -s '[:space:]' | cut -f2 -d" ") ; do echo "killing process id : "$i ; kill -9 $i ; done
 #sleep 30
 echo "un-mounting"
@@ -264,7 +264,7 @@ umount -l /mnt
 sleep 10
 df
 sync; echo 3 > /proc/sys/vm/drop_caches
-free -m 
+free -m
 availableRAM=$(echo $availableRAMcommand | bash)
 custom_param_ram="-m "$(expr $availableRAM - 200 )"M"
 custom_param_ram2="-m "$(expr $availableRAM - 500 )"M"
